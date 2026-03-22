@@ -8,5 +8,5 @@ interface AuthRepository {
 
     suspend fun load()
 
-    suspend fun verifyOtp(deviceId: String, otpToken: String): Result<String>
+    suspend fun verifyOtp(otpToken: String): Result<String>
 }

@@ -7,11 +7,13 @@ import wiki.comnet.alerttrigger.data.remote.ApiService
 import wiki.comnet.alerttrigger.data.remote.dto.VerifyOtpRequest
 import wiki.comnet.alerttrigger.domain.repository.AccessTokenRepository
 import wiki.comnet.alerttrigger.domain.repository.AuthRepository
+import wiki.comnet.alerttrigger.domain.repository.DeviceIdRepository
 
 class AuthRepositoryImpl(
     private val apiService: ApiService,
     private val accessTokenRepository: AccessTokenRepository,
     private val prefsManager: PrefsManager,
+    private val deviceIdRepository: DeviceIdRepository,
 ) : AuthRepository {
 
     override fun isLogin(): Flow<Boolean> = flow {
@@ -25,11 +27,9 @@ class AuthRepositoryImpl(
         accessTokenRepository.setAccessToken(token)
     }
 
-    override suspend fun verifyOtp(
-        deviceId: String,
-        otpToken: String,
-    ): Result<String> {
+    override suspend fun verifyOtp(otpToken: String): Result<String> {
         return try {
+            val deviceId = deviceIdRepository.getDeviceId()
             val response = apiService.verifyOtp(VerifyOtpRequest(otpToken, deviceId))
             if (response.success && response.data != null) {
                 val token = response.data.accessToken

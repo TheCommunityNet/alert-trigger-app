@@ -28,14 +28,14 @@ class LoginViewModel(
 
     fun login(otpToken: String) {
         if (otpToken.isBlank()) {
-            _uiState.value = _uiState.value.copy(error = "OTP and Device ID are required")
+            _uiState.value = _uiState.value.copy(error = "OTP is required")
             return
         }
 
         viewModelScope.launch {
             _uiState.value = LoginUiState(isLoading = true)
 
-            val loginResult = authRepository.verifyOtp("test123", otpToken)
+            val loginResult = authRepository.verifyOtp(otpToken)
             if (loginResult.isFailure) {
                 _uiState.value = LoginUiState(
                     error = loginResult.exceptionOrNull()?.message ?: "Login failed"

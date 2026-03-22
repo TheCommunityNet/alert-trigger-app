@@ -40,7 +40,7 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        viewModel.loadShellies()
+        viewModel.loadHomeData()
     }
 
     LaunchedEffect(uiState.snackbarMessage) {
@@ -82,6 +82,23 @@ fun HomeScreen(
                         Text(
                             text = shelly.name,
                             style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                items(uiState.categories) { category ->
+                    OutlinedButton(
+                        onClick = {
+                            viewModel.triggerCategory(category.value, category.label)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                    ) {
+                        Text(
+                            text = category.label,
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
