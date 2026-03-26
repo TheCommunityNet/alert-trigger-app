@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +40,6 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadHomeData()
-    }
-
     LaunchedEffect(uiState.snackbarMessage) {
         uiState.snackbarMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -52,7 +49,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Shellies") })
+            TopAppBar(title = { Text("ComNet အရေးပေါ်သတိပေးစနစ်") })
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
@@ -72,19 +69,22 @@ fun HomeScreen(
                     .padding(innerPadding),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                items(uiState.shellies) { shelly ->
-                    Button(
-                        onClick = { viewModel.toggleShelly(shelly.id, shelly.name) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text(
-                            text = shelly.name,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                item {
+                    if (uiState.userMessage.isNotBlank()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            ),
+                        ) {
+                            Text(
+                                text = uiState.userMessage,
+                                modifier = Modifier.padding(16.dp),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 items(uiState.categories) { category ->
@@ -116,7 +116,7 @@ fun HomeScreen(
                         )
                     ) {
                         Text(
-                            text = "Toggle All",
+                            text = "အားလုံးဖွင့်မယ်",
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }

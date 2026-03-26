@@ -18,7 +18,14 @@ class PrefsManager(
         prefs.edit { remove(KEY_ACCESS_TOKEN) }
     }
 
+    fun saveUserMessage(message: String) {
+        prefs.edit { putString(KEY_USER_MESSAGE, message) }
+    }
+
+    fun getUserMessage(): String? = prefs.getString(KEY_USER_MESSAGE, null)
+
     companion object {
         private const val KEY_ACCESS_TOKEN = "access_token"
+        private const val KEY_USER_MESSAGE = "user_message"
     }
 }

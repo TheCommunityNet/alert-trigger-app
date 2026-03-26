@@ -7,55 +7,59 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import wiki.comnet.alerttrigger.domain.model.Shelly
 import wiki.comnet.alerttrigger.domain.model.ShellyCategory
 import wiki.comnet.alerttrigger.domain.repository.ShellyRepository
+import wiki.comnet.alerttrigger.domain.repository.UserMessageRepository
 
 data class HomeUiState(
-    val shellies: List<Shelly> = emptyList(),
     val categories: List<ShellyCategory> = emptyList(),
+    val userMessage: String = "",
     val isLoading: Boolean = false,
     val snackbarMessage: String? = null
 )
 
 
 class HomeViewModel constructor(
-    private val shellyRepository: ShellyRepository
+    private val shellyRepository: ShellyRepository,
+    private val userMessageRepository: UserMessageRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        loadHomeData()
         viewModelScope.launch {
-            shellyRepository.fetchAndCacheShellies()
-            shellyRepository.fetchAndCacheCategories()
             loadHomeData()
         }
     }
 
     fun loadHomeData() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            val shellies = shellyRepository.getCachedShellies()
-            val categories = shellyRepository.getCachedCategories()
+            val cachedMessage = userMessageRepository.getCachedMessage()
+            val cachedCategories = shellyRepository.getCachedCategories()
+            val hasCache =
+                cachedMessage.isNotBlank() || cachedCategories.isNotEmpty()
             _uiState.value = _uiState.value.copy(
-                shellies = shellies,
-                categories = categories,
+                userMessage = cachedMessage,
+                categories = cachedCategories,
+                isLoading = !hasCache,
+            )
+            shellyRepository.fetchAndCacheCategories()
+            userMessageRepository.fetchAndCacheMessage().fold(
+                onSuccess = { message ->
+                    _uiState.value = _uiState.value.copy(userMessage = message)
+                },
+                onFailure = {
+                    _uiState.value = _uiState.value.copy(
+                        userMessage = userMessageRepository.getCachedMessage(),
+                    )
+                },
+            )
+            _uiState.value = _uiState.value.copy(
+                categories = shellyRepository.getCachedCategories(),
+                userMessage = userMessageRepository.getCachedMessage(),
                 isLoading = false,
             )
-        }
-    }
-
-    fun toggleShelly(shellyId: String, shellyName: String) {
-        viewModelScope.launch {
-            val result = shellyRepository.toggleShellyAlert(shellyId)
-            val message = result.fold(
-                onSuccess = { action -> "$shellyName: $action" },
-                onFailure = { e -> "$shellyName: ${e.message}" }
-            )
-            _uiState.value = _uiState.value.copy(snackbarMessage = message)
         }
     }
 

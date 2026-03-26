@@ -11,6 +11,7 @@ import wiki.comnet.alerttrigger.data.remote.dto.BaseResponse
 import wiki.comnet.alerttrigger.data.remote.dto.ShellyCategoryData
 import wiki.comnet.alerttrigger.data.remote.dto.ShellyData
 import wiki.comnet.alerttrigger.data.remote.dto.TriggerByCategoryRequest
+import wiki.comnet.alerttrigger.data.remote.dto.UserMessageData
 import wiki.comnet.alerttrigger.data.remote.dto.VerifyOtpData
 import wiki.comnet.alerttrigger.data.remote.dto.VerifyOtpRequest
 
@@ -22,6 +23,10 @@ class ApiService(private val client: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(data)
         }.body<BaseResponse<VerifyOtpData?>>()
+    }
+
+    suspend fun getUserMessage(): BaseResponse<UserMessageData> {
+        return client.get("$BASE_URL/api/v1/user/message").body<BaseResponse<UserMessageData>>()
     }
 
     suspend fun getShellies(): BaseResponse<List<ShellyData>> {
